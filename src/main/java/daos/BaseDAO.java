@@ -15,7 +15,7 @@ public abstract class BaseDAO<T extends BaseEntity> implements DAO<T> {
     protected EntityManager em;
 
     @Resource
-    private UserTransaction transaction;
+    protected UserTransaction transaction;
 
     private Class<T> entityClass;
 

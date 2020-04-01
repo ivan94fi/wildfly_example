@@ -2,7 +2,9 @@ package domain;
 
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 
 @Entity
@@ -10,7 +12,11 @@ public class User extends BaseEntity {
 
     private String username;
 
-    @OneToMany
+    @OneToMany(
+            fetch = FetchType.LAZY,
+            mappedBy = "user",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
     private List<Booking> bookings;
 
     public User() {}
@@ -31,8 +37,14 @@ public class User extends BaseEntity {
         return bookings;
     }
 
+    public void addBooking(Booking booking) {
+        this.bookings.add(booking);
+        booking.setUser(this);
+    }
+
     public void setBookings(List<Booking> bookings) {
         this.bookings = bookings;
+        bookings.forEach(booking -> booking.setUser(this));
     }
 
     @Override

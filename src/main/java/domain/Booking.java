@@ -3,6 +3,8 @@ package domain;
 import java.time.LocalDateTime;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 @Entity
@@ -15,6 +17,10 @@ public class Booking extends BaseEntity {
 
     @ManyToOne
     private Structure structure;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "student_id")
+    private User user;
 
     public Booking() {}
 
@@ -56,6 +62,11 @@ public class Booking extends BaseEntity {
 
     public void setStructure(Structure structure) {
         this.structure = structure;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+
     }
 
 }

@@ -61,7 +61,7 @@ public class UserEndpoint {
     public Response getSingleUser(@PathParam("id") Long id) {
         User user = userDao.findById(id);
         if (user == null) {
-            return Response.ok().entity("").build();
+            return Response.status(Status.NOT_FOUND).build();
         }
         try {
             user.setBookings(userDao.getAllBookings(id));

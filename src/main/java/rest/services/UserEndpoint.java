@@ -7,7 +7,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -37,6 +39,19 @@ public class UserEndpoint {
         List<UserDTO> dtos = users.stream().map(userMapper::convert)
                 .collect(toList());
         return Response.ok().entity(dtos).build();
+    }
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response postUser(UserDTO dto) {
+        if (dto == null) {
+            return Response.status(Status.BAD_REQUEST).build();
+        }
+        User user = new User();
+        userMapper.transfer(dto, user);
+        userDao.save(user);
+        return Response.ok(userMapper.convert(user)).build();
     }
 
     @GET

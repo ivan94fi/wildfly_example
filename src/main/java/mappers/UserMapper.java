@@ -1,5 +1,6 @@
 package mappers;
 
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 
 import java.util.List;
@@ -50,14 +51,17 @@ public class UserMapper {
         if (user == null) {
             throw new IllegalArgumentException("user cannot be null");
         }
-        // TODO: checks on id?
         user.setUsername(dto.getUsername());
 
-        List<Booking> bookings = dto.getBookings().stream()
-                .map(bookingDao::findById).filter(Objects::nonNull)
-                .collect(toList());
-
-        user.setBookings(bookings);
+        List<Long> dtoBookings = dto.getBookings();
+        if (dtoBookings == null || dtoBookings.isEmpty()) {
+            user.setBookings(emptyList());
+        } else {
+            List<Booking> bookings = dtoBookings.stream()
+                    .map(bookingDao::findById).filter(Objects::nonNull)
+                    .collect(toList());
+            user.setBookings(bookings);
+        }
     }
 
 }

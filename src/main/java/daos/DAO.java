@@ -10,4 +10,6 @@ public interface DAO<T extends BaseEntity> {
     public T findById(Long id);
 
     public boolean save(T entity);
+
+    boolean delete(T entity);
 }

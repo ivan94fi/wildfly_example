@@ -52,6 +52,24 @@ public abstract class BaseDAO<T extends BaseEntity> implements DAO<T> {
         return success;
     }
 
+    @Override
+    public boolean delete(T entity) {
+        boolean success = false;
+        try {
+            transaction.begin();
+            if (em.contains(entity)) {
+                em.remove(entity);
+            } else {
+                em.remove(em.merge(entity));
+            }
+            transaction.commit();
+            success = true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return success;
+    }
+
     public Class<T> getEntityClass() {
         return entityClass;
     }

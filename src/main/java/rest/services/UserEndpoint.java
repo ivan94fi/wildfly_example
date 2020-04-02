@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -73,8 +74,22 @@ public class UserEndpoint {
         return Response.ok(userMapper.convert(user)).build();
     }
 
+    @DELETE
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response removeUser(@PathParam("id") Long id) {
+        User user = userDao.findById(id);
+        if (user == null) {
+            return Response.status(Status.NOT_FOUND).build();
+        }
+        UserDTO dto = userMapper.convert(user);
+        userDao.delete(user);
+        return Response.ok(dto).build();
+    }
+
     @GET
     @Path("/insert-test-users")
+    @Produces(MediaType.TEXT_HTML)
     public Response insertTestUser() {
         /* ********************* */
         User user1 = new User("test_user1");

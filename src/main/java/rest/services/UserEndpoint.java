@@ -20,6 +20,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import daos.UserDAO;
+import domain.Booking;
 import domain.User;
 import dtos.UserDTO;
 import mappers.UserMapper;
@@ -50,10 +51,14 @@ public class UserEndpoint {
             return Response.status(Status.BAD_REQUEST).build();
         }
         User user = new User();
-        userDao.save(user);
+        boolean saveSuccess = userDao.save(user);
         userMapper.transfer(dto, user);
-        userDao.merge(user); // TODO: is this right? Added otherwise the
-                             // username is not saved inside the entity..
+        // TODO: is this right? Added otherwise the username is not saved inside
+        // the entity..
+        boolean mergeSuccess = userDao.merge(user);
+        if (!saveSuccess || !mergeSuccess) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+        }
         URI uri;
         try {
             uri = new URI(user.getId().toString());
@@ -72,14 +77,16 @@ public class UserEndpoint {
         if (user == null) {
             return Response.status(Status.NOT_FOUND).build();
         }
+        List<Booking> userBookings;
         try {
-            user.setBookings(userDao.getAllBookings(id));
+            userBookings = userDao.getAllBookings(id);
         } catch (Exception e) {
             e.printStackTrace();
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity(
                     "Unable to retrieve bookings for user with id " + id)
                     .build();
         }
+        user.setBookings(userBookings);
         return Response.ok(userMapper.convert(user)).build();
     }
 
@@ -92,7 +99,10 @@ public class UserEndpoint {
             return Response.status(Status.NOT_FOUND).build();
         }
         UserDTO dto = userMapper.convert(user);
-        userDao.delete(user);
+        boolean success = userDao.delete(user);
+        if (!success) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+        }
         return Response.ok(dto).build();
     }
 
@@ -108,14 +118,12 @@ public class UserEndpoint {
         if (dto == null) {
             return Response.status(Status.BAD_REQUEST).build();
         }
-
         userMapper.transfer(dto, user);
-
-        if (userDao.merge(user)) {
-            return Response.ok(userMapper.convert(user)).build();
+        boolean success = userDao.merge(user);
+        if (!success) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
         }
-        return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-
+        return Response.ok(userMapper.convert(user)).build();
     }
 
 }

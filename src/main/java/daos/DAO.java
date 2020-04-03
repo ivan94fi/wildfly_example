@@ -12,4 +12,6 @@ public interface DAO<T extends BaseEntity> {
     public boolean save(T entity);
 
     boolean delete(T entity);
+
+    boolean merge(T entity);
 }

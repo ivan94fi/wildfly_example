@@ -11,6 +11,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -85,6 +86,28 @@ public class UserEndpoint {
         UserDTO dto = userMapper.convert(user);
         userDao.delete(user);
         return Response.ok(dto).build();
+    }
+
+    @PUT
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response updateUser(@PathParam("id") Long id, UserDTO dto) {
+        User user = userDao.findById(id);
+        if (user == null) {
+            return Response.status(Status.NOT_FOUND).build();
+        }
+        if (dto == null) {
+            return Response.status(Status.BAD_REQUEST).build();
+        }
+
+        userMapper.transfer(dto, user);
+
+        if (userDao.merge(user)) {
+            return Response.ok(userMapper.convert(user)).build();
+        }
+        return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+
     }
 
     @GET

@@ -70,6 +70,20 @@ public abstract class BaseDAO<T extends BaseEntity> implements DAO<T> {
         return success;
     }
 
+    @Override
+    public boolean merge(T entity) {
+        boolean success = false;
+        try {
+            transaction.begin();
+            em.merge(entity);
+            transaction.commit();
+            success = true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return success;
+    }
+
     public Class<T> getEntityClass() {
         return entityClass;
     }

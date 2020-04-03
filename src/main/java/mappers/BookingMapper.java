@@ -9,8 +9,10 @@ import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 
 import daos.StructureDAO;
+import daos.UserDAO;
 import domain.Booking;
 import domain.Structure;
+import domain.User;
 import dtos.BookingDTO;
 
 @RequestScoped
@@ -19,12 +21,16 @@ public class BookingMapper {
     @Inject
     private StructureDAO structureDAO;
 
+    @Inject
+    private UserDAO userDao;
+
     public BookingDTO convert(Booking booking) {
         if (booking == null) {
             throw new IllegalArgumentException("booking cannot be null");
         }
         BookingDTO dto = new BookingDTO();
         dto.setId(booking.getId());
+        dto.setUser(booking.getUser().getId());
         dto.setCreationDate(this.formatDate(booking.getCreationDate()));
         dto.setBookingStart(this.formatDate(booking.getBookingStart()));
         dto.setBookingEnd(this.formatDate(booking.getBookingEnd()));
@@ -39,6 +45,12 @@ public class BookingMapper {
         if (booking == null) {
             throw new IllegalArgumentException("booking cannot be null");
         }
+        User user = userDao.findById(dto.getUser());
+        if (user == null) {
+            throw new IllegalArgumentException(
+                    "The referenced user does not exist, booking cannot be created.");
+        }
+        booking.setUser(user);
         booking.setCreationDate(this.parseDate(dto.getCreationDate()));
         booking.setBookingStart(this.parseDate(dto.getBookingStart()));
         booking.setBookingEnd(this.parseDate(dto.getBookingEnd()));

@@ -62,6 +62,7 @@ public class UserMapper {
             return;
         }
         for (BookingDTO bookingDto : bookingDtos) {
+            bookingDto.setUser(user.getId());
             Booking booking = new Booking();
             bookingMapper.transfer(bookingDto, booking);
             user.addBooking(booking);

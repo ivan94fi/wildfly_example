@@ -1,10 +1,9 @@
 package mappers;
 
-import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -13,6 +12,7 @@ import daos.BookingDAO;
 import daos.UserDAO;
 import domain.Booking;
 import domain.User;
+import dtos.BookingDTO;
 import dtos.UserDTO;
 
 @RequestScoped
@@ -24,6 +24,9 @@ public class UserMapper {
     @Inject
     private BookingDAO bookingDao;
 
+    @Inject
+    private BookingMapper bookingMapper;
+
     public UserDTO convert(User user) {
         if (user == null) {
             throw new IllegalArgumentException("user cannot be null");
@@ -32,15 +35,15 @@ public class UserMapper {
         dto.setId(user.getId());
         dto.setUsername(user.getUsername());
 
-        List<Long> bookingIds;
+        List<BookingDTO> bookingDtos;
         try {
-            bookingIds = userDao.getAllBookings(user.getId()).stream()
-                    .map(Booking::getId).collect(toList());
+            bookingDtos = userDao.getAllBookings(user.getId()).stream()
+                    .map(bookingMapper::convert).collect(toList());
         } catch (Exception e) {
             e.printStackTrace();
             return null; // FIXME
         }
-        dto.setBookings(bookingIds);
+        dto.setBookings(bookingDtos);
         return dto;
     }
 
@@ -53,14 +56,16 @@ public class UserMapper {
         }
         user.setUsername(dto.getUsername());
 
-        List<Long> dtoBookings = dto.getBookings();
-        if (dtoBookings == null || dtoBookings.isEmpty()) {
-            user.setBookings(emptyList());
-        } else {
-            List<Booking> bookings = dtoBookings.stream()
-                    .map(bookingDao::findById).filter(Objects::nonNull)
-                    .collect(toList());
-            user.setBookings(bookings);
+        user.setBookings(new ArrayList<>());
+        List<BookingDTO> bookingDtos = dto.getBookings();
+        if (bookingDtos == null || bookingDtos.isEmpty()) {
+            return;
+        }
+        for (BookingDTO bookingDto : bookingDtos) {
+            Booking booking = new Booking();
+            bookingMapper.transfer(bookingDto, booking);
+            user.addBooking(booking);
+            bookingDao.save(booking);
         }
     }
 

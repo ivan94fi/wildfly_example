@@ -5,7 +5,7 @@ import java.util.List;
 public class UserDTO {
 
     private String username;
-    private List<Long> bookings;
+    private List<BookingDTO> bookings;
     private Long id;
 
     public String getUsername() {
@@ -16,11 +16,11 @@ public class UserDTO {
         this.username = username;
     }
 
-    public List<Long> getBookings() {
+    public List<BookingDTO> getBookings() {
         return bookings;
     }
 
-    public void setBookings(List<Long> bookings) {
+    public void setBookings(List<BookingDTO> bookings) {
         this.bookings = bookings;
     }
 

@@ -21,8 +21,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import daos.StructureDAO;
 import daos.UserDAO;
 import domain.Booking;
+import domain.Structure;
 import domain.User;
 import dtos.UserDTO;
 import mappers.UserMapper;
@@ -32,6 +34,9 @@ public class UserEndpoint {
 
     @Inject
     private UserDAO userDao;
+
+    @Inject
+    private StructureDAO structureDao;
 
     @Inject
     private UserMapper userMapper;
@@ -53,8 +58,10 @@ public class UserEndpoint {
             return Response.status(Status.BAD_REQUEST).build();
         }
         User user = new User();
-        userMapper.transfer(dto, user);
         userDao.save(user);
+        userMapper.transfer(dto, user);
+        userDao.merge(user); // TODO: is this right? Added otherwise the
+                             // username is not saved inside the entity..
         URI uri;
         try {
             uri = new URI(user.getId().toString());
@@ -124,15 +131,23 @@ public class UserEndpoint {
     @Produces(MediaType.TEXT_HTML)
     public Response insertTestUser() {
         /* ********************* */
+        Structure structure1 = new Structure("Hotel Stella Alpina",
+                "Via Trento 1");
+        Structure structure2 = new Structure("Hotel Bellosguardo",
+                "Via Case Sparse 42");
+        structureDao.save(structure1);
+        structureDao.save(structure2);
         User user1 = new User("test_user1");
         User user2 = new User("test_user2");
         LocalDateTime now = LocalDateTime.now();
         user1.setBookings(Arrays.asList(
-                new Booking(now, now.plusDays(1), now.plusDays(8), null),
-                new Booking(now, now.plusDays(15), now.plusDays(25), null)));
+                new Booking(now, now.plusDays(1), now.plusDays(8), structure1),
+                new Booking(now, now.plusDays(15), now.plusDays(25),
+                        structure2)));
         user2.setBookings(Arrays.asList(
-                new Booking(now, now.plusDays(1), now.plusDays(8), null),
-                new Booking(now, now.plusDays(15), now.plusDays(25), null)));
+                new Booking(now, now.plusDays(1), now.plusDays(8), structure1),
+                new Booking(now, now.plusDays(15), now.plusDays(25),
+                        structure2)));
         userDao.save(user1);
         userDao.save(user2);
         /* ********************* */

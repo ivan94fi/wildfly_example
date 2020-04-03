@@ -5,10 +5,19 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
+
+import daos.StructureDAO;
 import domain.Booking;
+import domain.Structure;
 import dtos.BookingDTO;
 
+@RequestScoped
 public class BookingMapper {
+
+    @Inject
+    private StructureDAO structureDAO;
 
     public BookingDTO convert(Booking booking) {
         if (booking == null) {
@@ -33,6 +42,12 @@ public class BookingMapper {
         booking.setCreationDate(this.parseDate(dto.getCreationDate()));
         booking.setBookingStart(this.parseDate(dto.getBookingStart()));
         booking.setBookingEnd(this.parseDate(dto.getBookingEnd()));
+        Structure structure = structureDAO.findById(dto.getStructure());
+        if (structure == null) {
+            throw new IllegalArgumentException(
+                    "The referenced structure does not exist, booking cannot be created.");
+        }
+        booking.setStructure(structure);
     }
 
     private String formatDate(LocalDateTime date) {

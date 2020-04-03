@@ -2,6 +2,8 @@ package rest.services;
 
 import static java.util.stream.Collectors.toList;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -53,7 +55,14 @@ public class UserEndpoint {
         User user = new User();
         userMapper.transfer(dto, user);
         userDao.save(user);
-        return Response.ok(userMapper.convert(user)).build();
+        URI uri;
+        try {
+            uri = new URI(user.getId().toString());
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+        }
+        return Response.created(uri).entity(userMapper.convert(user)).build();
     }
 
     @GET

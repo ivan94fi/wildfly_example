@@ -4,8 +4,6 @@ import static java.util.stream.Collectors.toList;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -21,10 +19,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import daos.StructureDAO;
 import daos.UserDAO;
-import domain.Booking;
-import domain.Structure;
 import domain.User;
 import dtos.UserDTO;
 import mappers.UserMapper;
@@ -34,9 +29,6 @@ public class UserEndpoint {
 
     @Inject
     private UserDAO userDao;
-
-    @Inject
-    private StructureDAO structureDao;
 
     @Inject
     private UserMapper userMapper;
@@ -124,41 +116,6 @@ public class UserEndpoint {
         }
         return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 
-    }
-
-    @GET
-    @Path("/insert-test-users")
-    @Produces(MediaType.TEXT_HTML)
-    public Response insertTestUser() {
-        /* ********************* */
-        Structure structure1 = new Structure("Hotel Stella Alpina",
-                "Via Trento 1");
-        Structure structure2 = new Structure("Hotel Bellosguardo",
-                "Via Case Sparse 42");
-        structureDao.save(structure1);
-        structureDao.save(structure2);
-        User user1 = new User("test_user1");
-        User user2 = new User("test_user2");
-        LocalDateTime now = LocalDateTime.now();
-        user1.setBookings(Arrays.asList(
-                new Booking(now, now.plusDays(1), now.plusDays(8), structure1),
-                new Booking(now, now.plusDays(15), now.plusDays(25),
-                        structure2)));
-        user2.setBookings(Arrays.asList(
-                new Booking(now, now.plusDays(1), now.plusDays(8), structure1),
-                new Booking(now, now.plusDays(15), now.plusDays(25),
-                        structure2)));
-        userDao.save(user1);
-        userDao.save(user2);
-        /* ********************* */
-        // Arrays.asList(user1, user2).forEach(user -> {
-        // try {
-        // user.setBookings(userDao.getAllBookings(user.getId()));
-        // } catch (Exception e) {
-        // e.printStackTrace();
-        // }
-        // });
-        return Response.ok().build();
     }
 
 }

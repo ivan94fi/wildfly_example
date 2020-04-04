@@ -3,7 +3,10 @@ package mappers;
 import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -12,6 +15,7 @@ import daos.BookingDAO;
 import daos.UserDAO;
 import domain.Booking;
 import domain.User;
+import domain.User.Role;
 import dtos.BookingDTO;
 import dtos.UserDTO;
 
@@ -35,6 +39,9 @@ public class UserMapper {
         dto.setId(user.getId());
         dto.setUsername(user.getUsername());
 
+        dto.setRoles(new HashSet<>());
+        this.convertRoles(dto, user.getRoles());
+
         List<BookingDTO> bookingDtos;
         try {
             bookingDtos = userDao.getAllBookings(user.getId()).stream()
@@ -56,6 +63,11 @@ public class UserMapper {
         }
         user.setUsername(dto.getUsername());
 
+        if (user.getRoles() == null) {
+            user.setRoles(EnumSet.noneOf(Role.class));
+        }
+        this.transferRoles(user, dto.getRoles());
+
         user.setBookings(new ArrayList<>());
         List<BookingDTO> bookingDtos = dto.getBookings();
         if (bookingDtos == null || bookingDtos.isEmpty()) {
@@ -67,6 +79,23 @@ public class UserMapper {
             bookingMapper.transfer(bookingDto, booking);
             user.addBooking(booking);
             bookingDao.save(booking);
+        }
+    }
+
+    private void convertRoles(UserDTO dto, Set<Role> roles) {
+        if (roles != null && !roles.isEmpty()) {
+            roles.forEach(role -> dto.getRoles().add(role.toString()));
+        } else {
+            dto.getRoles().add(Role.BASIC.toString());
+        }
+    }
+
+    private void transferRoles(User user, Set<String> roles) {
+        user.getRoles().clear();
+        if (roles != null && !roles.isEmpty()) {
+            roles.forEach(role -> user.addRole(Role.valueOf(role)));
+        } else {
+            user.addRole(Role.BASIC);
         }
     }
 

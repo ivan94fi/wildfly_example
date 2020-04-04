@@ -1,11 +1,13 @@
 package dtos;
 
 import java.util.List;
+import java.util.Set;
 
 public class UserDTO {
 
     private String username;
     private List<BookingDTO> bookings;
+    private Set<String> roles;
     private Long id;
 
     public String getUsername() {
@@ -22,6 +24,14 @@ public class UserDTO {
 
     public void setBookings(List<BookingDTO> bookings) {
         this.bookings = bookings;
+    }
+
+    public Set<String> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<String> roles) {
+        this.roles = roles;
     }
 
     public void setId(Long id) {

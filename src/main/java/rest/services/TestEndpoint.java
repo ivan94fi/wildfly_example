@@ -2,6 +2,7 @@ package rest.services;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.EnumSet;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -15,6 +16,7 @@ import daos.UserDAO;
 import domain.Booking;
 import domain.Structure;
 import domain.User;
+import domain.User.Role;
 
 @Path("test")
 public class TestEndpoint {
@@ -37,6 +39,12 @@ public class TestEndpoint {
         structureDao.save(structure2);
         User user1 = new User("test_user1");
         User user2 = new User("test_user2");
+        User user3 = new User("test_user3"); // do not set roles
+        User user4 = new User("test_user4");
+        user1.setRoles(EnumSet.of(Role.BASIC, Role.ADMIN));
+        user2.setRoles(EnumSet.of(Role.BASIC, Role.MODERATOR));
+        user4.setRoles(EnumSet.noneOf(Role.class));
+
         LocalDateTime now = LocalDateTime.now();
         user1.setBookings(Arrays.asList(
                 new Booking(now, now.plusDays(1), now.plusDays(8), structure1),
@@ -48,6 +56,8 @@ public class TestEndpoint {
                         structure2)));
         userDao.save(user1);
         userDao.save(user2);
+        userDao.save(user3);
+        userDao.save(user4);
         return Response.ok().build();
     }
 

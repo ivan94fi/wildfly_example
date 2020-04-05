@@ -4,6 +4,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
+import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -27,6 +28,7 @@ public class StructureEndpoint {
     private StructureDAO structureDao;
 
     @GET
+    @RolesAllowed("ADMIN")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAll() {
         List<Structure> stuctures = structureDao.findAll();

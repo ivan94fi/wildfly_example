@@ -76,4 +76,8 @@ public class User extends BaseEntity {
         return "User [username=" + username + "]";
     }
 
+    public boolean hasRole(String role) {
+        return this.roles.contains(Role.valueOf(role));
+    }
+
 }

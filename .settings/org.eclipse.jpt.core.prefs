@@ -1,6 +1,6 @@
 eclipse.preferences.version=1
 entitygen.DEFAULT_PACKAGE=model
-org.eclipse.jpt.core.platform=hibernate2_1
+org.eclipse.jpt.core.platform=generic2_1
 org.eclipse.jpt.jpa.core.discoverAnnotatedClasses=true
 problem.ASSOCIATION_OVERRIDE_INVALID_NAME=error
 problem.ATTRIBUTE_OVERRIDE_DERIVED_AND_SPECIFIED=error

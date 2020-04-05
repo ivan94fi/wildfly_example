@@ -44,8 +44,10 @@ public class UserMapper {
 
         List<BookingDTO> bookingDtos;
         try {
-            bookingDtos = userDao.getAllBookings(user.getId()).stream()
-                    .map(bookingMapper::convert).collect(toList());
+            bookingDtos = userDao.getAllBookings(user.getId())
+                                 .stream()
+                                 .map(bookingMapper::convert)
+                                 .collect(toList());
         } catch (Exception e) {
             e.printStackTrace();
             return null; // FIXME

@@ -40,8 +40,9 @@ public class UserEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAll() {
         List<User> users = userDao.findAll();
-        List<UserDTO> dtos = users.stream().map(userMapper::convert)
-                .collect(toList());
+        List<UserDTO> dtos = users.stream()
+                                  .map(userMapper::convert)
+                                  .collect(toList());
         return Response.ok().entity(dtos).build();
     }
 
@@ -84,9 +85,10 @@ public class UserEndpoint {
             userBookings = userDao.getAllBookings(id);
         } catch (Exception e) {
             e.printStackTrace();
-            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(
-                    "Unable to retrieve bookings for user with id " + id)
-                    .build();
+            return Response.status(Status.INTERNAL_SERVER_ERROR)
+                           .entity("Unable to retrieve bookings for user with id "
+                                   + id)
+                           .build();
         }
         user.setBookings(userBookings);
         return Response.ok(userMapper.convert(user)).build();

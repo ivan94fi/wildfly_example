@@ -39,8 +39,9 @@ public class BookingEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAll() {
         List<Booking> bookings = bookingDao.findAll();
-        List<BookingDTO> dtos = bookings.stream().map(bookingMapper::convert)
-                .collect(toList());
+        List<BookingDTO> dtos = bookings.stream()
+                                        .map(bookingMapper::convert)
+                                        .collect(toList());
         return Response.ok().entity(dtos).build();
     }
 
@@ -65,8 +66,9 @@ public class BookingEndpoint {
             e.printStackTrace();
             return Response.status(Status.INTERNAL_SERVER_ERROR).build();
         }
-        return Response.created(uri).entity(bookingMapper.convert(booking))
-                .build();
+        return Response.created(uri)
+                       .entity(bookingMapper.convert(booking))
+                       .build();
     }
 
     @GET

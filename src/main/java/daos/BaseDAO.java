@@ -27,10 +27,10 @@ public abstract class BaseDAO<T extends BaseEntity> implements DAO<T> {
 
     @Override
     public List<T> findAll() {
-        StringBuilder queryBuilder = new StringBuilder("from ")
-                .append(entityClass.getName());
+        StringBuilder queryBuilder = new StringBuilder("from ").append(
+                entityClass.getName());
         return em.createQuery(queryBuilder.toString(), entityClass)
-                .getResultList();
+                 .getResultList();
     }
 
     @Override

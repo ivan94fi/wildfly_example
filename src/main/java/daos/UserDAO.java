@@ -16,21 +16,19 @@ public class UserDAO extends BaseDAO<User> {
 
     public User findByUsername(String username) throws Exception {
         transaction.begin();
-        User result = em
-                .createQuery("from User " + "where username = :username ",
-                        User.class)
-                .setParameter("username", username).getSingleResult();
+        User result = em.createQuery(
+                "from User " + "where username = :username ", User.class)
+                        .setParameter("username", username)
+                        .getSingleResult();
         transaction.commit();
         return result;
     }
 
     public List<Booking> getAllBookings(Long id) throws Exception {
         transaction.begin();
-        User result = em
-                .createQuery("select user " + "from User user "
-                        + "left join fetch user.bookings "
-                        + "where user.id = :id", User.class)
-                .setParameter("id", id).getSingleResult();
+        User result = em.createQuery("select user " + "from User user "
+                + "left join fetch user.bookings " + "where user.id = :id",
+                User.class).setParameter("id", id).getSingleResult();
         transaction.commit();
         return result.getBookings();
     }

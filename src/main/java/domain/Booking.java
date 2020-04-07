@@ -19,7 +19,7 @@ public class Booking extends BaseEntity {
     private Structure structure;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "student_id")
+    @JoinColumn(name = "user_id")
     private User user;
 
     public Booking() {}

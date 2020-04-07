@@ -1,5 +1,7 @@
 package domain;
 
+import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
@@ -25,11 +27,11 @@ public class User extends BaseEntity {
             mappedBy = "user",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
-    private List<Booking> bookings;
+    private List<Booking> bookings = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     @ElementCollection(fetch = FetchType.EAGER)
-    private Set<Role> roles;
+    private Set<Role> roles = EnumSet.noneOf(Role.class);
 
     public User() {}
 

@@ -2,8 +2,6 @@ package mappers;
 
 import static java.util.stream.Collectors.toList;
 
-import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -65,12 +63,8 @@ public class UserMapper {
         }
         user.setUsername(dto.getUsername());
 
-        if (user.getRoles() == null) {
-            user.setRoles(EnumSet.noneOf(Role.class));
-        }
         this.transferRoles(user, dto.getRoles());
 
-        user.setBookings(new ArrayList<>());
         List<BookingDTO> bookingDtos = dto.getBookings();
         if (bookingDtos == null || bookingDtos.isEmpty()) {
             return;

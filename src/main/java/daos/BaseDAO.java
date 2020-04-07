@@ -15,7 +15,7 @@ public abstract class BaseDAO<T extends BaseEntity> implements DAO<T> {
     protected EntityManager em;
 
     @Resource
-    protected UserTransaction transaction;
+    private UserTransaction transaction;
 
     private Class<T> entityClass;
 
@@ -82,6 +82,10 @@ public abstract class BaseDAO<T extends BaseEntity> implements DAO<T> {
             e.printStackTrace();
         }
         return success;
+    }
+
+    protected UserTransaction getTransaction() {
+        return transaction;
     }
 
     public Class<T> getEntityClass() {

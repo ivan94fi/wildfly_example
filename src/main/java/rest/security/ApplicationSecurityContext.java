@@ -2,6 +2,7 @@ package rest.security;
 
 import java.security.Principal;
 
+import javax.persistence.NoResultException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.SecurityContext;
 
@@ -32,7 +33,9 @@ public class ApplicationSecurityContext implements SecurityContext {
         try {
             principal = userDao.findByUsername(principalUsername);
         } catch (Exception e) {
-            e.printStackTrace();
+            if (!(e instanceof NoResultException)) {
+                e.printStackTrace();
+            }
             return false;
         }
         return principal != null && principal.hasRole(role);

@@ -17,6 +17,8 @@ import javax.ws.rs.ext.Provider;
 
 import daos.UserDAO;
 import rest.security.ApplicationSecurityContext;
+import rest.security.SecurityBypass;
+import rest.security.TestSecurityContext;
 
 @Provider
 @Priority(Priorities.AUTHENTICATION)
@@ -30,6 +32,12 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
     @Override
     public void filter(ContainerRequestContext requestContext)
             throws IOException {
+        if (SecurityBypass.isTestRequest(requestContext)) {
+            requestContext.setSecurityContext(
+                    new TestSecurityContext(requestContext));
+            return;
+        }
+
         String authorizationHeader = requestContext.getHeaderString(
                 HttpHeaders.AUTHORIZATION);
         if (authorizationHeader == null || authorizationHeader.isEmpty()) {
@@ -49,6 +57,8 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
             username = credentials.split(":", 2)[0];
             // TODO check passwords
         }
+
+        // TODO: check if username exists, else abort with Forbidden
 
         requestContext.setSecurityContext(new ApplicationSecurityContext(
                 userDao, username, requestContext));

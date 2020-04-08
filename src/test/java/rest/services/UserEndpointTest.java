@@ -1,13 +1,15 @@
 package rest.services;
 
-import static domain.User.Role.ADMIN;
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
+import static io.restassured.http.ContentType.JSON;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isA;
 import static rest.security.SecurityBypass.PASSWORD_ENV_VAR;
 import static rest.security.SecurityBypass.TEST_HEADER;
 
@@ -15,6 +17,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -30,10 +34,10 @@ import org.junit.Test;
 import domain.Booking;
 import domain.Structure;
 import domain.User;
+import domain.User.Role;
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 
@@ -65,7 +69,7 @@ public class UserEndpointTest {
         RestAssured.basePath = "/swam-example/rest";
 
         okJSONResponseSpecification = new ResponseSpecBuilder().expectStatusCode(
-                200).expectContentType(ContentType.JSON).build();
+                200).expectContentType(JSON).build();
 
         BasicPasswordEncryptor passwordEncryptor = new BasicPasswordEncryptor();
         String encryptedPassword = passwordEncryptor.encryptPassword(
@@ -166,7 +170,7 @@ public class UserEndpointTest {
     public void testGetAllWhenCorrectAuthorizationSuppliedShouldReturnOk() {
         EntityManager em = emf.createEntityManager();
         User user1 = new User("admin");
-        user1.setRoles(EnumSet.of(ADMIN));
+        user1.setRoles(EnumSet.of(Role.ADMIN));
         em.getTransaction().begin();
         em.persist(user1);
         em.getTransaction().commit();
@@ -295,6 +299,177 @@ public class UserEndpointTest {
             .get("/users/{id}")
         .then()
             .statusCode(Status.UNAUTHORIZED.getStatusCode());
+        // @formatter:on
+    }
+
+    @Test
+    public void testPostUserWhenUserIsNullShouldReturnBadRequest() {
+        // @formatter:off
+        given()
+            .spec(bypassAuthenticationRequestSpecification)
+            .contentType(JSON)
+        .when()
+            .post("/users")
+        .then()
+            .statusCode(Status.BAD_REQUEST.getStatusCode());
+        // @formatter:on
+    }
+
+    @Test
+    public void testPostUserWhenUserIsMalformedShouldReturnBadRequest() {
+        Map<String, String> json = new HashMap<>();
+        json.put("wrongfield", "John");
+        json.put("wrongfield2", "Doe");
+        // @formatter:off
+        given()
+            .spec(bypassAuthenticationRequestSpecification)
+            .contentType(JSON)
+            .body(json)
+        .when()
+            .post("/users")
+        .then()
+            .statusCode(Status.BAD_REQUEST.getStatusCode());
+        // @formatter:on
+    }
+
+    @Test
+    public void testPostUserWhenUserIsCorrectShouldReturnCreatedAndUserWithId() {
+        Map<String, String> json = new HashMap<>();
+        json.put("username", "John");
+        // @formatter:off
+        given()
+            .spec(bypassAuthenticationRequestSpecification)
+            .contentType(JSON)
+            .body(json)
+        .when()
+            .post("/users")
+        .then()
+            .body("username", equalTo(json.get("username")))
+            .body("id", isA(Integer.class))
+            .body("bookings", empty())
+            .body("roles", contains(Role.BASIC.toString()))
+            .statusCode(Status.CREATED.getStatusCode());
+        // @formatter:on
+    }
+
+    @Test
+    public void testRemoveUserWhenUserNotFoundShouldReturnNotFound() {
+        // @formatter:off
+        given()
+            .spec(bypassAuthenticationRequestSpecification)
+            .pathParam("id", "1")
+        .when()
+            .delete("/users/{id}")
+        .then()
+            .statusCode(Status.NOT_FOUND.getStatusCode())
+            .body(is(emptyOrNullString()));
+        // @formatter:on   
+    }
+
+    @Test
+    public void testRemoveUserWhenUserIsFoundShouldReturnOkAndDeletedUser() {
+        EntityManager em = emf.createEntityManager();
+        User user1 = new User("test_user1");
+        em.getTransaction().begin();
+        em.persist(user1);
+        em.getTransaction().commit();
+
+        // @formatter:off
+        given()
+            .spec(bypassAuthenticationRequestSpecification)
+            .pathParam("id", user1.getId().toString())
+        .when()
+            .delete("/users/{id}")
+        .then()
+            .spec(okJSONResponseSpecification)
+            .body("username", equalTo(user1.getUsername()));
+        // @formatter:on
+    }
+
+    @Test
+    public void testUpdateUserWhenUserNotFoundShouldReturnNotFound() {
+        // @formatter:off
+        given()
+            .spec(bypassAuthenticationRequestSpecification)
+            .contentType(JSON)
+            .pathParam("id", "1")
+        .when()
+            .put("/users/{id}")
+        .then()
+            .statusCode(Status.NOT_FOUND.getStatusCode())
+            .body(is(emptyOrNullString()));
+        // @formatter:on 
+    }
+
+    @Test
+    public void testUpdateUserIsNullShouldReturnBadRequest() {
+        EntityManager em = emf.createEntityManager();
+        User user1 = new User("test_user1");
+        em.getTransaction().begin();
+        em.persist(user1);
+        em.getTransaction().commit();
+
+        // @formatter:off
+        given()
+            .spec(bypassAuthenticationRequestSpecification)
+            .contentType(JSON)
+            .pathParam("id", user1.getId().toString())
+        .when()
+            .put("/users/{id}")
+        .then()
+            .statusCode(Status.BAD_REQUEST.getStatusCode())
+            .body(is(emptyOrNullString()));
+        // @formatter:on 
+    }
+
+    @Test
+    public void testUpdateUserWhenUserIsMalformedShouldReturnBadRequest() {
+        EntityManager em = emf.createEntityManager();
+        User user1 = new User("test_user1");
+        em.getTransaction().begin();
+        em.persist(user1);
+        em.getTransaction().commit();
+
+        Map<String, String> json = new HashMap<>();
+        json.put("wrongfield", "John");
+        json.put("wrongfield2", "Doe");
+
+        // @formatter:off
+            given()
+                .spec(bypassAuthenticationRequestSpecification)
+                .contentType(JSON)
+                .body(json)
+                .pathParam("id", user1.getId().toString())
+            .when()
+                .put("/users/{id}")
+            .then()
+                .statusCode(Status.BAD_REQUEST.getStatusCode());
+        // @formatter:on
+    }
+
+    @Test
+    public void testUpdateUserWhenUserIsFoundAndUserIsCorrectShouldReturnOkAndUpdatedUser() {
+        EntityManager em = emf.createEntityManager();
+        User user1 = new User("test_user1");
+        em.getTransaction().begin();
+        em.persist(user1);
+        em.getTransaction().commit();
+
+        Map<String, String> json = new HashMap<>();
+        String update_username = "updated_username_for_test_user1";
+        json.put("username", update_username);
+
+        // @formatter:off
+            given()
+                .spec(bypassAuthenticationRequestSpecification)
+                .contentType(JSON)
+                .body(json)
+                .pathParam("id", user1.getId().toString())
+            .when()
+                .put("/users/{id}")
+            .then()
+                .statusCode(Status.OK.getStatusCode())
+                .body("username", equalTo(update_username));
         // @formatter:on
     }
 

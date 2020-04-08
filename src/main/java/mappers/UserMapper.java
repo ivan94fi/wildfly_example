@@ -95,4 +95,8 @@ public class UserMapper {
         }
     }
 
+    public boolean isValid(UserDTO dto) {
+        return dto.getUsername() != null;
+    }
+
 }

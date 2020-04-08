@@ -50,7 +50,7 @@ public class UserEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response postUser(UserDTO dto) {
-        if (dto == null) {
+        if (dto == null || !userMapper.isValid(dto)) {
             return Response.status(Status.BAD_REQUEST).build();
         }
         User user = new User();
@@ -119,7 +119,7 @@ public class UserEndpoint {
         if (user == null) {
             return Response.status(Status.NOT_FOUND).build();
         }
-        if (dto == null) {
+        if (dto == null || !userMapper.isValid(dto)) {
             return Response.status(Status.BAD_REQUEST).build();
         }
         userMapper.transfer(dto, user);

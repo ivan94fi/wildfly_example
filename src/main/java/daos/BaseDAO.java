@@ -5,6 +5,7 @@ import java.util.List;
 import javax.annotation.Resource;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.transaction.Status;
 import javax.transaction.UserTransaction;
 
 import domain.BaseEntity;
@@ -40,45 +41,42 @@ public abstract class BaseDAO<T extends BaseEntity> implements DAO<T> {
 
     @Override
     public boolean save(T entity) {
-        boolean success = false;
-        try {
-            transaction.begin();
-            em.persist(entity);
-            transaction.commit();
-            success = true;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return success;
+        return doInTransaction(() -> em.persist(entity));
     }
 
     @Override
     public boolean delete(T entity) {
-        boolean success = false;
-        try {
-            transaction.begin();
+        return doInTransaction(() -> {
             if (em.contains(entity)) {
                 em.remove(entity);
             } else {
                 em.remove(em.merge(entity));
             }
-            transaction.commit();
-            success = true;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return success;
+        });
+
     }
 
     @Override
     public boolean merge(T entity) {
+        return doInTransaction(() -> em.merge(entity));
+    }
+
+    private boolean doInTransaction(Runnable lambda) {
         boolean success = false;
         try {
             transaction.begin();
-            em.merge(entity);
+            lambda.run();
             transaction.commit();
             success = true;
         } catch (Exception e) {
+            try {
+                if (transaction != null
+                        && transaction.getStatus() == Status.STATUS_ACTIVE) {
+                    transaction.rollback();
+                }
+            } catch (Exception e1) {
+                e1.printStackTrace();
+            }
             e.printStackTrace();
         }
         return success;

@@ -3,10 +3,13 @@ package daos;
 import java.util.List;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Status;
 import javax.transaction.UserTransaction;
+
+import org.jboss.logging.Logger;
 
 import domain.BaseEntity;
 
@@ -17,6 +20,9 @@ public abstract class BaseDAO<T extends BaseEntity> implements DAO<T> {
 
     @Resource
     private UserTransaction transaction;
+
+    @Inject
+    private Logger logger;
 
     private Class<T> entityClass;
 
@@ -75,9 +81,9 @@ public abstract class BaseDAO<T extends BaseEntity> implements DAO<T> {
                     transaction.rollback();
                 }
             } catch (Exception e1) {
-                e1.printStackTrace();
+                logger.error(e1);
             }
-            e.printStackTrace();
+            logger.error(e);
         }
         return success;
     }

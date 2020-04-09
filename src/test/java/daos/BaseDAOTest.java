@@ -19,6 +19,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.transaction.UserTransaction;
 
+import org.jboss.logging.Logger;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -42,6 +43,9 @@ public class BaseDAOTest {
 
     @Mock
     TypedQuery<TestEntity> query;
+
+    @Mock
+    private Logger logger;
 
     @InjectMocks
     private TestDAO dao;

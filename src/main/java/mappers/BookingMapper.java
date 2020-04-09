@@ -8,6 +8,8 @@ import java.time.format.DateTimeParseException;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 
+import org.jboss.logging.Logger;
+
 import daos.StructureDAO;
 import daos.UserDAO;
 import domain.Booking;
@@ -23,6 +25,9 @@ public class BookingMapper {
 
     @Inject
     private UserDAO userDao;
+
+    @Inject
+    private Logger logger;
 
     public BookingDTO convert(Booking booking) {
         if (booking == null) {
@@ -67,7 +72,7 @@ public class BookingMapper {
         try {
             formattedDate = date.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         } catch (DateTimeException e) {
-            e.printStackTrace();
+            logger.error(e);
             throw new IllegalArgumentException("cannot format date");
         }
         return formattedDate;
@@ -78,7 +83,7 @@ public class BookingMapper {
         try {
             parsedDate = LocalDateTime.parse(dateString);
         } catch (DateTimeParseException e) {
-            e.printStackTrace();
+            logger.error(e);
             throw new IllegalArgumentException("cannot parse date");
         }
         return parsedDate;

@@ -20,6 +20,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.jboss.logging.Logger;
+
 import daos.UserDAO;
 import domain.Booking;
 import domain.User;
@@ -34,6 +36,9 @@ public class UserEndpoint {
 
     @Inject
     private UserMapper userMapper;
+
+    @Inject
+    private Logger logger;
 
     @GET
     @RolesAllowed("ADMIN")
@@ -66,7 +71,7 @@ public class UserEndpoint {
         try {
             uri = new URI(user.getId().toString());
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+            logger.error(e);
             return Response.status(Status.INTERNAL_SERVER_ERROR).build();
         }
         return Response.created(uri).entity(userMapper.convert(user)).build();
@@ -84,7 +89,7 @@ public class UserEndpoint {
         try {
             userBookings = userDao.getAllBookings(id);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e);
             return Response.status(Status.INTERNAL_SERVER_ERROR)
                            .entity("Unable to retrieve bookings for user with id "
                                    + id)

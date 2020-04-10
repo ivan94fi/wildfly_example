@@ -18,6 +18,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.jboss.logging.Logger;
+
 import daos.StructureDAO;
 import domain.Structure;
 
@@ -26,6 +28,9 @@ public class StructureEndpoint {
 
     @Inject
     private StructureDAO structureDao;
+
+    @Inject
+    private Logger logger;
 
     @GET
     @RolesAllowed("ADMIN")
@@ -50,7 +55,7 @@ public class StructureEndpoint {
         try {
             uri = new URI(structure.getId().toString());
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+            logger.error("Error in building URI", e);
             return Response.status(Status.INTERNAL_SERVER_ERROR).build();
         }
         return Response.created(uri).entity(structure).build();

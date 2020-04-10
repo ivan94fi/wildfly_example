@@ -42,7 +42,7 @@ public class BaseDAOTest {
     private UserTransaction transaction;
 
     @Mock
-    TypedQuery<TestEntity> query;
+    private TypedQuery<TestEntity> query;
 
     @Mock
     private Logger logger;

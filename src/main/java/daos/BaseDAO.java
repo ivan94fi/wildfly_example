@@ -76,14 +76,13 @@ public abstract class BaseDAO<T extends BaseEntity> implements DAO<T> {
             success = true;
         } catch (Exception e) {
             try {
-                if (transaction != null
-                        && transaction.getStatus() == Status.STATUS_ACTIVE) {
+                if (transaction.getStatus() == Status.STATUS_ACTIVE) {
                     transaction.rollback();
                 }
             } catch (Exception e1) {
-                logger.error(e1);
+                logger.error("Cannot rollback transaction", e1);
             }
-            logger.error(e);
+            logger.error("Cannot complete database operation", e);
         }
         return success;
     }

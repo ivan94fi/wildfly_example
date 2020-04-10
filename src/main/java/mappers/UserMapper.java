@@ -9,6 +9,8 @@ import java.util.Set;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 
+import org.jboss.logging.Logger;
+
 import daos.BookingDAO;
 import daos.UserDAO;
 import domain.Booking;
@@ -29,6 +31,9 @@ public class UserMapper {
     @Inject
     private BookingMapper bookingMapper;
 
+    @Inject
+    private Logger logger;
+
     public UserDTO convert(User user) {
         if (user == null) {
             throw new IllegalArgumentException("user cannot be null");
@@ -47,7 +52,7 @@ public class UserMapper {
                                  .map(bookingMapper::convert)
                                  .collect(toList());
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error in retrieving bookings", e);
             return null; // FIXME
         }
         dto.setBookings(bookingDtos);

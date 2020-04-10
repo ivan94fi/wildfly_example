@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.enterprise.context.RequestScoped;
 import javax.transaction.Status;
+import javax.transaction.SystemException;
 
 import domain.Booking;
 import domain.User;
@@ -15,7 +16,7 @@ public class UserDAO extends BaseDAO<User> {
         super(User.class);
     }
 
-    public User findByUsername(String username) throws Exception {
+    public User findByUsername(String username) throws DAOException {
         User result;
         try {
             getTransaction().begin();
@@ -25,16 +26,20 @@ public class UserDAO extends BaseDAO<User> {
                        .getSingleResult();
             getTransaction().commit();
         } catch (Exception e) {
-            if (getTransaction() != null
-                    && getTransaction().getStatus() == Status.STATUS_ACTIVE) {
-                getTransaction().rollback();
+            try {
+                if (getTransaction() != null
+                        && getTransaction().getStatus() == Status.STATUS_ACTIVE) {
+                    getTransaction().rollback();
+                }
+            } catch (SystemException se) {
+                // nothing to do
             }
-            throw e;
+            throw new DAOException(e);
         }
         return result;
     }
 
-    public List<Booking> getAllBookings(Long id) throws Exception {
+    public List<Booking> getAllBookings(Long id) throws DAOException {
         User result;
         try {
             getTransaction().begin();
@@ -43,11 +48,15 @@ public class UserDAO extends BaseDAO<User> {
                     User.class).setParameter("id", id).getSingleResult();
             getTransaction().commit();
         } catch (Exception e) {
-            if (getTransaction() != null
-                    && getTransaction().getStatus() == Status.STATUS_ACTIVE) {
-                getTransaction().rollback();
+            try {
+                if (getTransaction() != null
+                        && getTransaction().getStatus() == Status.STATUS_ACTIVE) {
+                    getTransaction().rollback();
+                }
+            } catch (SystemException se) {
+                // nothing to do
             }
-            throw e;
+            throw new DAOException(e);
         }
         return result.getBookings();
     }

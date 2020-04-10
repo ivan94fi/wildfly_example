@@ -71,7 +71,7 @@ public class UserEndpoint {
         try {
             uri = new URI(user.getId().toString());
         } catch (URISyntaxException e) {
-            logger.error(e);
+            logger.error("Error in building URI", e);
             return Response.status(Status.INTERNAL_SERVER_ERROR).build();
         }
         return Response.created(uri).entity(userMapper.convert(user)).build();
@@ -89,7 +89,7 @@ public class UserEndpoint {
         try {
             userBookings = userDao.getAllBookings(id);
         } catch (Exception e) {
-            logger.error(e);
+            logger.error("Error in retrieving bookings for user", e);
             return Response.status(Status.INTERNAL_SERVER_ERROR)
                            .entity("Unable to retrieve bookings for user with id "
                                    + id)

@@ -2,14 +2,18 @@ package rest.security;
 
 import java.security.Principal;
 
-import javax.persistence.NoResultException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.SecurityContext;
 
+import org.jboss.logging.Logger;
+
+import daos.DAOException;
 import daos.UserDAO;
 import domain.User;
 
 public class ApplicationSecurityContext implements SecurityContext {
+
+    private Logger logger = Logger.getLogger(this.getClass());
 
     private UserDAO userDao;
     private String principalUsername;
@@ -32,10 +36,8 @@ public class ApplicationSecurityContext implements SecurityContext {
         User principal;
         try {
             principal = userDao.findByUsername(principalUsername);
-        } catch (Exception e) {
-            if (!(e instanceof NoResultException)) {
-                e.printStackTrace();
-            }
+        } catch (DAOException e) {
+            logger.error("Error in finding username", e);
             return false;
         }
         return principal != null && principal.hasRole(role);

@@ -20,6 +20,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.jboss.logging.Logger;
+
 import daos.BookingDAO;
 import domain.Booking;
 import dtos.BookingDTO;
@@ -33,6 +35,9 @@ public class BookingEndpoint {
 
     @Inject
     private BookingMapper bookingMapper;
+
+    @Inject
+    private Logger logger;
 
     @GET
     @RolesAllowed("ADMIN")
@@ -63,7 +68,7 @@ public class BookingEndpoint {
         try {
             uri = new URI(booking.getId().toString());
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+            logger.error("Error in building URI", e);
             return Response.status(Status.INTERNAL_SERVER_ERROR).build();
         }
         return Response.created(uri)

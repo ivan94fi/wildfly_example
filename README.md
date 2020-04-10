@@ -19,22 +19,30 @@ This project employs the following technologies:
 
 ## Installation/Running
 This project requires the following services to run:
-* a running instance of a Wildfly server, where the application must be deployed
-* a running instance of a MariaDB server (can be provided with a docker image, see following sections)
+* a running instance of a Wildfly server on localhost (8080 port by default)
+* a running instance of a MariaDB server on localhost (3306 port by default, can be provided with a docker image, see following sections)
 
+### Steps for deployment
+1. start a Wildfly intance
+2. deploy the MariaDB driver on the server
+3. start the MariaDB server (on the default address `localhost:3306`, with credentials `root`:`pass`)
+4. create a datasource with name MariaDBDS and connect it to the server
+5. deploy the application on the server. The persistence unit declared on the application will use the MariaDBDS datasource
+
+### Using the endpoints
 After the application is deployed on the server, it is available at `localhost:8080/swam-example/rest` and it exposes the following endpoints:
 * `/users`
 * `/bookings`
 * `/structures`
 
-The endpoints accept HTTP `GET`, `POST`, `PUT` and `DELETE` methods. See `rest.endpoint.UserEndpointTest` for examples.
+The endpoints accept HTTP `GET`, `POST`, `PUT` and `DELETE` methods. See the tests in `rest.endpoint.UserEndpointTest` for examples.
 
 ## Authorization
-The "get all" endpoints, that is `/users`, `/bookings` and `/structures` contacted with a `GET` requests, require a basic authorization in the form of `username` and `password` (the password is actually ignored). All the other endpoints only require the header `Authorization: Basic` to be present in the request.
+The "get all" endpoints, that is `/users`, `/bookings` and `/structures` contacted with a `GET` request, require a basic authorization in the form of `username` and `password` (the password is actually ignored). All the other endpoints only require the header `Authorization: Basic` to be present in the request.
 
 More specifically, the "get all" endpoints require that the user contacting them is a registered user with `ADMIN` role.
 
-As a shortcut an additional unprotected endpoint is exposed, `/test/populate`, which creates some entities and in particular an admin user with username `test_user1` It is then possible to use this username to access the protected endpoints.
+As a shortcut for development, an additional unprotected endpoint is exposed, `/test/populate`, which creates some entities and in particular an admin user with username `test_user1`. It is then possible to use this username to access the protected endpoints.
 
 As an alternative, the post user endpoint can be invoked to create an admin:
 ```bash
@@ -62,12 +70,16 @@ To access the server with a command line interface the following command can be 
 docker exec -it mariadb mysql MariaDB -u root -p
 ```
 
+To stop or remove the server use: `docker [stop|rm] mariadb`.
+
 ## Executing tests
 Two kinds of tests are implemented:
 * *unit tests*: the BaseDAO class is tested with unit tests in isolation, by mocking the entity manager injection with Mockito
 * *integration tests*: the UserEndpoint class is tested by deploying the application in the container and then verifying the behevior by directly invokating the REST endpoints
 
-The first ones can be executed without the container, while the second ones must be executed while the application endpoints are available.
+The first ones can be executed without a running container.
+
+The second ones require the database and application to be available on localhost.
 
 The command to execute tests is simply:
 ```bash
